@@ -129,7 +129,6 @@ bool ophGen::readConfig(const char* fname, OphPointCloudConfig& configdata)
 
 	xml_node = xml_doc.FirstChild();
 
-
 #if REAL_IS_DOUBLE & true
 	auto next = xml_node->FirstChildElement("ScalingXofPointCloud");
 	if (!next || tinyxml2::XML_SUCCESS != next->QueryDoubleText(&configdata.scale[_X]))
@@ -166,7 +165,7 @@ bool ophGen::readConfig(const char* fname, OphPointCloudConfig& configdata)
 	//(xml_node->FirstChildElement("FocalLengthofEyepieceLens"))->QueryDoubleText(&configdata.focal_length_lens_eye_piece);
 	//(xml_node->FirstChildElement("TiltAngleX"))->QueryDoubleText(&configdata.tilt_angle[_X]);
 	//(xml_node->FirstChildElement("TiltAngleY"))->QueryDoubleText(&configdata.tilt_angle[_Y]);
-#else	
+#else
 	auto next = xml_node->FirstChildElement("ScalingXofPointCloud");
 	if (!next || tinyxml2::XML_SUCCESS != next->QueryFloatText(&configdata.scale[_X]))
 		return false;
@@ -202,7 +201,7 @@ bool ophGen::readConfig(const char* fname, OphPointCloudConfig& configdata)
 	//(xml_node->FirstChildElement("FocalLengthofEyepieceLens"))->QueryFloatText(&configdata.focal_length_lens_eye_piece);
 	//(xml_node->FirstChildElement("TiltAngleX"))->QueryFloatText(&configdata.tilt_angle[_X]);
 	//(xml_node->FirstChildElement("TiltAngleY"))->QueryFloatText(&configdata.tilt_angle[_Y]);
-#endif	
+#endif
 	next = xml_node->FirstChildElement("SLMpixelNumX");
 	if (!next || tinyxml2::XML_SUCCESS != next->QueryIntText(&context_.pixel_number[_X]))
 		return false;
@@ -280,7 +279,6 @@ bool ophGen::readConfig(const char* fname, OphDepthMapConfig & config)
 		config.num_of_depth = config.DEFAULT_DEPTH_QUANTIZATION;
 	else
 		config.num_of_depth = config.NUMBER_OF_DEPTH_QUANTIZATION;
-	
 
 	std::string render_depth;
 	next = xml_node->FirstChildElement("RenderDepth");
@@ -623,7 +621,7 @@ void ophGen::loadComplex(char* real_file, char* imag_file, int n_x, int n_y) {
 }
 
 void ophGen::normalizeEncoded() {
-	oph::normalize((Real*)holo_encoded, holo_normalized, encode_size.v[_X], encode_size.v[_Y]);
+	oph::normalize(holo_encoded, holo_normalized, encode_size.v[_X], encode_size.v[_Y]);
 }
 
 void ophGen::encoding(unsigned int ENCODE_FLAG) {
@@ -656,36 +654,42 @@ void ophGen::encoding(unsigned int ENCODE_FLAG) {
 	switch (ENCODE_FLAG)
 	{
 	case ENCODE_SIMPLENI:
-		cout << "Simple Numerical Interference Encoding.." << endl;
+		LOG("Simple Numerical Interference Encoding..");
 		numericalInterference((*complex_H), holo_encoded, size);
+		LOG("Done.\n.");
 		break;
 	case ENCODE_REAL:
-		cout << "Real Part Encoding.." << endl;
+		LOG("Real Part Encoding..");
 		realPart<Real>((*complex_H), holo_encoded, size);
+		LOG("Done.\n.");
 		break;
 	case ENCODE_BURCKHARDT:
-		cout << "Burckhardt Encoding.." << endl;
+		LOG("Burckhardt Encoding..");
 		burckhardt((*complex_H), holo_encoded, size);
+		LOG("Done.\n.");
 		break;
 	case ENCODE_TWOPHASE:
-		cout << "Two Phase Encoding.." << endl;
+		LOG("Two Phase Encoding..");
 		twoPhaseEncoding((*complex_H), holo_encoded, size);
+		LOG("Done.\n.");
 		break;
 	case ENCODE_PHASE:
-		cout << "Phase Encoding.." << endl;
+		LOG("Phase Encoding..");
 		getPhase((*complex_H), holo_encoded, size);
+		LOG("Done.\n.");
 		break;
 	case ENCODE_AMPLITUDE:
-		cout << "Amplitude Encoding.." << endl;
+		LOG("Amplitude Encoding..");
 		getAmplitude((*complex_H), holo_encoded, size);
+		LOG("Done.\n.");
 		break;
 	case ENCODE_SSB:
 	case ENCODE_OFFSSB:
-		cout << "error: PUT PASSBAND" << endl;
+		LOG("error: PUT PASSBAND\n");
 		cin.get();
 		return;
 	default:
-		cout << "error: WRONG ENCODE_FLAG" << endl;
+		LOG("error: WRONG ENCODE_FLAG\n");
 		cin.get();
 		return;
 	}
@@ -711,16 +715,18 @@ void ophGen::encoding(unsigned int ENCODE_FLAG, unsigned int passband) {
 	switch (ENCODE_FLAG)
 	{
 	case ENCODE_SSB:
-		cout << "Single Side Band Encoding.." << endl;
+		LOG("Single Side Band Encoding..");
 		singleSideBand((*complex_H), holo_encoded, context_.pixel_number, passband);
+		LOG("Done.");
 		break;
 	case ENCODE_OFFSSB:
-		cout << "Off-axis Single Side Band Encoding.." << endl;
+		LOG("Off-axis Single Side Band Encoding..");
 		freqShift((*complex_H), (*complex_H), context_.pixel_number, 0, 100);
 		singleSideBand((*complex_H), holo_encoded, context_.pixel_number, passband);
+		LOG("Done.\n");
 		break;
 	default:
-		cout << "error: WRONG ENCODE_FLAG" << endl;
+		LOG("error: WRONG ENCODE_FLAG\n");
 		cin.get();
 		return;
 	}

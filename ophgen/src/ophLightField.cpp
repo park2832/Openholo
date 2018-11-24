@@ -45,6 +45,8 @@
 
 #include "ophLightField.h"
 
+#include "include.h"
+
 #include "sys.h"
 #include "tinyxml2.h"
 
@@ -142,7 +144,7 @@ int ophLF::readLFConfig(const char* LF_config) {
 	context_.k = (2 * M_PI) / context_.wave_length[0];
 	context_.ss[_X] = context_.pixel_number[_X] * context_.pixel_pitch[_X];
 	context_.ss[_Y] = context_.pixel_number[_Y] * context_.pixel_pitch[_Y];
-	
+
 	cout << endl;
 	cout << "SLM pixel pitch: " << context_.pixel_pitch[_X] << ", " << context_.pixel_pitch[_Y] << endl;
 	cout << "Wavelength of LASER: " << context_.wave_length[0] << endl;
@@ -206,7 +208,7 @@ int ophLF::loadLF(const char* directory, const char* exten)
 		_findclose(ff);
 		cout << "LF load was successed." << endl;
 
-		if (num_image[_X]*num_image[_Y] != num) {
+		if (num_image[_X] * num_image[_Y] != num) {
 			cout << "num_image is not matched." << endl;
 		}
 		return 1;
@@ -275,16 +277,28 @@ void ophLF::generateHologram() {
 
 	auto start = CUR_TIME;
 
-	cout << "Generating Hologram..." << endl;
+	LOG("Converting....");
 	convertLF2ComplexField();
-	cout << "Convert finished" << endl;
+	LOG("finished.\n");
+
+	LOG("Propagating ...");
 	fresnelPropagation(RSplane_complex_field, (*complex_H), distanceRS2Holo);
+	LOG("finished.\n");
 
 	auto end = CUR_TIME;
 	auto during = ((std::chrono::duration<Real>)(end - start)).count();
 
 	LOG("%.5lfsec...hologram generated..\n", during);
 }
+
+//int ophLF::saveAsOhc(const char * fname)
+//{
+//	setPixelNumberOHC(getEncodeSize());
+//
+//	Openholo::saveAsOhc(fname);
+//
+//	return 0;
+//}
 
 
 void ophLF::initializeLF() {
